@@ -13,41 +13,38 @@ def upload_form():
 
 @app.route('/', methods=['POST'])
 def upload_image():
-    #write operation_selection
-    operation_selection=request.form['image_type_selection']
+    operation_selection = request.form['image_type_selection']
     image_file = request.files['file']
     filename = secure_filename(image_file.filename)
     reading_file_data = image_file.read()
     image_array = np.fromstring(reading_file_data, dtype='uint8')
 
     decode_array_to_img = cv2.imdecode(image_array, cv2.IMREAD_UNCHANGED)
-
     if operation_selection == 'gray':
         file_data = make_grayscale(decode_array_to_img)
     elif operation_selection == 'sketch':
         file_data = image_sketch(decode_array_to_img)
-    #write elif condition for Water, Invert and HDR image below
-    elif operation_selection=='oil':
-    	file_data=oil_effect(decode_array_to_img)
-    elif operation_selection=='rgb':
-    	file_data=rgb_effect(decode_array_to_img)
-    elif operation_selection=='water':
-    	file_data=water_color_effect(decode_array_to_img)
-    elif operation_selection=='invert':
-    	file_data=invert(decode_array_to_img)
-    elif operation_selection=='hdr':
-    	file_data=HDR(decode_array_to_img)
+    elif operation_selection == 'oil': 
+        file_data = oil_effect(decode_array_to_img)
+    elif operation_selection == 'rgb':
+        file_data = rgb_effect(decode_array_to_img)
+# Code start from below
+    elif operation_selection == 'water':
+        file_data = water_color_effect(decode_array_to_img)
+    elif operation_selection == 'invert':
+        file_data = invert(decode_array_to_img) #268
+    elif operation_selection == 'hdr':
+        file_data = HDR(decode_array_to_img) #268
+# Code ends 
+
     else:
-    	print('No image')
+        print('No image')
 
-
-    # Ends here
     with open(os.path.join('static/', filename),
                   'wb') as f:
         f.write(file_data)
 
     return render_template('upload.html', filename=filename)
-
 
 def make_grayscale(decode_array_to_img):
 
@@ -78,39 +75,24 @@ def rgb_effect(decode_array_to_img):
     status, output_img = cv2.imencode('.PNG', rgb_effect_img)
 
     return output_img
-# Codes starts for water_color_effect, invert and HDR effect
+# Codes starts from below
 def water_color_effect(decode_array_to_img):
-	water_effect=cv2.stylization(decode_array_to_img,sigma_s=60,sigma_r=0.6)
-	status,output_img=cv2.imencode('.PNG',water_effect)
+    water_effect = cv2.stylization(decode_array_to_img, sigma_s=60, sigma_r=0.6)
+    status, output_img = cv2.imencode('.PNG', water_effect)
 
-	return output_img
+    return output_img
+
 def invert(decode_array_to_img):
-	invert_effect=cv2.bitwise_not(decode_array_to_img)
-	status,output_img=cv2.imencode('.PNG',invert_effect)
-	return output_img
+    invert_effect = cv2.bitwise_not(decode_array_to_img)
+    status, output_img = cv2.imencode('.PNG', invert_effect)
+
+    return output_img
 
 def HDR(decode_array_to_img):
-	hdr_effect=cv2.detailEnhance(decode_array_to_img,sigma_s=12,sigma_r=0.15)
-	status,output_img=cv2.imencode('.PNG',hdr_effect)
+    hdr_effect = cv2.detailEnhance(decode_array_to_img, sigma_s=12, sigma_r=0.15)
+    status, output_img = cv2.imencode('.PNG', hdr_effect)
 
-	return output_img
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return output_img
 # Code ends
 
 
